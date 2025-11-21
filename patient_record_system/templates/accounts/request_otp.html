@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Sign in with Aadhaar - Request OTP</title></head>
+<body>
+<h2>Sign in with Aadhaar</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Send OTP</button>
+</form>
+</body>
+</html>

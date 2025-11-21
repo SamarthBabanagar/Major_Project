@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% block title %}My Medical Records{% endblock %}
+
+{% block content %}
+<h2 style="color:#004aad; text-align:center;">📁 My Medical Records</h2>
+
+<!-- Ungrouped Files Section -->
+<section style="border:2px solid #004aad; border-radius:10px; padding:15px; margin-bottom:30px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>Ungrouped Files</h3>
+        <div>
+            {% if files %}
+                <a href="{% url 'patients:download_ungrouped_zip' %}" class="btn btn-outline">⬇️ Download All</a>
+                <button class="btn btn-blue delete-ungrouped-all-btn" style="background-color:#ff4b4b;">
+                    🗑️ Delete All
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if files %}
+        {% for file in files %}
+            {% if not file.group %}
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:8px 0;">
+                    {% if file.file %}
+                        <a href="{{ file.file.url }}" target="_blank" style="text-decoration:none; color:#004aad; font-weight:bold;">
+                            {{ file.title|default:file.file.name|slice:"15" }}
+                        </a>
+                    {% else %}
+                        <span style="color:#999;">(File missing)</span>
+                    {% endif %}
+                    <div>
+                        {% if file.file %}
+                            <a href="{{ file.file.url }}" class="btn btn-outline" download>⬇️ Download</a>
+                        {% endif %}
+                        <button class="btn btn-blue delete-btn"
+                            data-file-id="{{ file.id }}"
+                            data-file-name="{{ file.title|default:file.file.name }}"
+                            data-grouped="false"
+                            style="background-color:#dc3545;">
+                            🗑 Delete
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No ungrouped files found.</p>
+    {% endif %}
+</section>
+
+<!-- Grouped Files Section -->
+<section>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>My Groups</h3>
+        <a href="{% url 'patients:create_group' %}" class="btn btn-blue">➕ Create Group</a>
+    </div>
+
+    {% if groups %}
+        {% for group in groups %}
+            <div style="border:1px solid #ccc; border-radius:10px; margin-bottom:20px; padding:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h4 style="margin:0;">📂 {{ group.name }}</h4>
+                    <div>
+                        <a href="{% url 'patients:add_to_group' group.id %}" class="btn btn-outline">➕ Add Files</a>
+                        <a href="{% url 'patients:download_group' group.id %}" class="btn btn-outline">⬇️ Download All</a>
+                        <button class="btn btn-blue delete-all-btn"
+                            data-group-id="{{ group.id }}"
+                            data-group-name="{{ group.name }}"
+                            style="background-color:#ff4b4b;">
+                            🗑️ Delete All Files
+                        </button>
+                        <a href="{% url 'patients:delete_group' group.id %}" class="btn btn-blue" style="background-color:#dc3545;">🗑 Delete Group</a>
+                    </div>
+                </div>
+
+                <ul style="list-style:none; padding-left:0; margin-top:10px;">
+                    {% for file in files %}
+                        {% if file.group and file.group.id == group.id %}
+                            <li style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:6px 0;">
+                                {% if file.file %}
+                                    <a href="{{ file.file.url }}" target="_blank" style="text-decoration:none; color:#004aad; font-weight:bold;">
+                                        {{ file.title|default:file.file.name|slice:"15" }}
+                                    </a>
+                                {% else %}
+                                    <span style="color:#999;">(File missing)</span>
+                                {% endif %}
+                                <div>
+                                    {% if file.file %}
+                                        <a href="{{ file.file.url }}" class="btn btn-outline" download>⬇️ Download</a>
+                                    {% endif %}
+                                    <button class="btn btn-blue delete-btn"
+                                        data-file-id="{{ file.id }}"
+                                        data-file-name="{{ file.title|default:file.file.name }}"
+                                        data-grouped="true"
+                                        style="background-color:#dc3545;">
+                                        🗑 Delete
+                                    </button>
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No groups created yet.</p>
+    {% endif %}
+</section>
+
+<!-- Bottom Buttons -->
+<div style="text-align:center; margin-top:30px;">
+    <button id="uploadRecordBtn" class="btn btn-blue">⬆️ Upload File</button>
+    <a href="{% url 'home' %}" class="btn btn-outline">🏠 Home</a>
+</div>
+
+<!-- 🔹 Upload Choice Modal -->
+<div id="uploadChoiceModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModalBtn" style="position:absolute; top:10px; right:15px; font-size:26px; color:#888; cursor:pointer;">&times;</span>
+        <h2 style="color:#004aad; margin-bottom:10px;">📤 Upload Your Records</h2>
+        <p style="color:#555; margin-bottom:25px;">Choose how you'd like to upload your medical files.</p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <a href="{% url 'patients:upload_file' %}" class="btn" style="background:#004aad; color:white;">➕ Single File Upload</a>
+            <a href="{% url 'patients:batch_upload' %}" class="btn btn-outline" style="color:#004aad;">📁 Batch Upload</a>
+        </div>
+    </div>
+</div>
+
+<!-- 🔹 Simple Delete Modal (Ungrouped Files) -->
+<div id="simpleDeleteModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:#004aad;">⚠️ Confirm Delete</h2>
+        <p>Are you sure you want to permanently delete:</p>
+        <p id="simpleDeleteText" style="color:#d9534f; font-weight:bold;"></p>
+        <form id="simpleDeleteForm" method="post">
+            {% csrf_token %}
+            <input type="hidden" id="simpleDeleteFileId" name="file_id">
+            <div style="display:flex; justify-content:center; gap:12px;">
+                <button type="submit" class="btn confirm-btn" style="background:#dc3545; color:white;">✅ Yes, Delete</button>
+                <button type="button" id="cancelSimpleDelete" class="btn cancel-btn" style="background:white; color:#007bff; border:2px solid #007bff;">❌ Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 🔹 Delete Modal (Grouped Files) -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:#004aad;">⚠️ Delete Record</h2>
+        <p>Do you want to remove or permanently delete:</p>
+        <p id="deleteText" style="font-weight:bold;"></p>
+        <div style="display:flex; justify-content:center; gap:12px;">
+            <form id="removeForm" method="post">{% csrf_token %}
+                <input type="hidden" id="removeFileId" name="file_id">
+                <button type="submit" class="btn animated-btn" style="background:#007bff; color:white;">🗂️ Remove from Group</button>
+            </form>
+            <form id="deleteForm" method="post">{% csrf_token %}
+                <input type="hidden" id="deleteFileId" name="file_id">
+                <button type="submit" class="btn animated-btn" style="background:#dc3545; color:white;">🗑️ Delete Permanently</button>
+            </form>
+            <button id="cancelDelete" class="btn cancel-btn" style="background:white; color:#007bff; border:2px solid #007bff;">↩️ Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- 🔹 Delete All Files in Group Modal -->
+<div id="deleteAllModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); z-index:2500;">
+    <div style="background:white; width:90%; max-width:420px; margin:12% auto; border-radius:12px; padding:30px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); animation:scaleIn 0.25s ease;">
+        <h2 style="color:#004aad; margin-bottom:15px;">⚠️ Delete All Files</h2>
+        <p style="color:#555; margin-bottom:10px;">Are you sure you want to permanently delete all files in:</p>
+        <strong id="deleteAllGroupName" style="display:block; color:#000; margin-bottom:20px;"></strong>
+
+        <!-- 🔴 Warning line -->
+        <p style="color:#dc3545; font-weight:bold; margin-bottom:25px;">⚠️ This action cannot be undone.</p>
+
+        <form id="deleteAllForm" method="post" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="group_id" id="deleteAllGroupId">
+            <button type="submit" class="btn animated-btn" style="background:#dc3545; color:white; padding:10px 20px; border:none; border-radius:8px;">
+                🗑️ Yes, Delete All
+            </button>
+            <button type="button" id="cancelDeleteAll" class="btn animated-btn" style="background:white; color:#007bff; border:2px solid #007bff; padding:10px 20px; border-radius:8px; margin-left:10px;">
+                ❌ Cancel
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- 🔹 Delete All Ungrouped Files Modal -->
+<div id="deleteUngroupedAllModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); z-index:2500;">
+    <div style="background:white; width:90%; max-width:420px; margin:12% auto; border-radius:12px; padding:30px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); animation:scaleIn 0.25s ease;">
+        <h2 style="color:#004aad; margin-bottom:15px;">⚠️ Delete All Ungrouped Files</h2>
+        <p style="color:#555; margin-bottom:10px;">Are you sure you want to permanently delete all ungrouped files?</p>
+        <p style="color:#dc3545; font-weight:bold; margin-bottom:25px;">⚠️ This action cannot be undone.</p>
+
+        <form id="deleteUngroupedAllForm" method="post" action="{% url 'patients:delete_all_ungrouped' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn animated-btn" style="background:#dc3545; color:white; padding:10px 20px; border:none; border-radius:8px;">
+                🗑️ Yes, Delete All
+            </button>
+            <button type="button" id="cancelDeleteUngroupedAll" class="btn animated-btn" style="background:white; color:#007bff; border:2px solid #007bff; padding:10px 20px; border-radius:8px; margin-left:10px;">
+                ❌ Cancel
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<style>
+@keyframes scaleIn { from { transform:scale(0.9); opacity:0; } to { transform:scale(1); opacity:1; } }
+@keyframes fadeIn { from { opacity:0; transform:scale(0.95);} to { opacity:1; transform:scale(1);} }
+@keyframes fadeOut { from { opacity:1; transform:scale(1);} to { opacity:0; transform:scale(0.95);} }
+
+.modal { display:none; position:fixed; inset:0; z-index:1500;
+         background:rgba(0,0,0,0.55); backdrop-filter:blur(8px) saturate(120%);
+         -webkit-backdrop-filter:blur(8px) saturate(120%);
+         justify-content:center; align-items:center; transition:opacity 0.3s ease; }
+.modal-show { display:flex !important; animation:fadeIn 0.25s ease forwards; }
+.modal-hide { animation:fadeOut 0.2s ease forwards; }
+.modal-content { background:linear-gradient(145deg,#ffffff,#f4f4f4);
+                 border-radius:16px; padding:30px; max-width:420px; width:90%;
+                 box-shadow:0 10px 25px rgba(0,0,0,0.2); text-align:center; animation:scaleIn 0.3s ease; }
+.animated-btn, .confirm-btn, .cancel-btn { transition:transform 0.25s ease, box-shadow 0.25s ease; border-radius:8px; }
+.animated-btn:hover, .confirm-btn:hover, .cancel-btn:hover { transform:scale(1.05); box-shadow:0 0 12px rgba(0,0,0,0.2); }
+.confirm-btn:hover { background-color:#b52b2b !important; }
+.cancel-btn:hover { background-color:#007bff !important; color:white !important; }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const uploadModal = document.getElementById("uploadChoiceModal");
+    const deleteModal = document.getElementById("deleteModal");
+    const simpleDeleteModal = document.getElementById("simpleDeleteModal");
+    const deleteAllModal = document.getElementById("deleteAllModal");
+
+    function openModal(modal){ modal.classList.remove("modal-hide"); modal.classList.add("modal-show"); }
+    function closeModal(modal){ modal.classList.remove("modal-show"); modal.classList.add("modal-hide"); setTimeout(()=>modal.style.display="none",200); }
+
+    document.getElementById("uploadRecordBtn").onclick = ()=>openModal(uploadModal);
+    document.getElementById("closeModalBtn").onclick = ()=>closeModal(uploadModal);
+
+    // Single or Grouped File Delete
+    document.querySelectorAll(".delete-btn").forEach(btn=>{
+        btn.addEventListener("click",function(){
+            const fileId=this.dataset.fileId, fileName=this.dataset.fileName, isGrouped=this.dataset.grouped==="true";
+            if(isGrouped){
+                document.getElementById("deleteText").textContent=fileName;
+                document.getElementById("removeForm").action=`/patients/remove/${fileId}/`;
+                document.getElementById("deleteForm").action=`/patients/delete/${fileId}/`;
+                openModal(deleteModal);
+            }else{
+                document.getElementById("simpleDeleteText").textContent=fileName;
+                document.getElementById("simpleDeleteForm").action=`/patients/delete/${fileId}/`;
+                openModal(simpleDeleteModal);
+            }
+        });
+    });
+
+    // Delete All Modal
+    document.querySelectorAll(".delete-all-btn").forEach(btn=>{
+        btn.addEventListener("click",function(){
+            const groupId=this.dataset.groupId, groupName=this.dataset.groupName;
+            document.getElementById("deleteAllForm").action=`/patients/group/${groupId}/delete_all/`;
+            document.getElementById("deleteAllGroupName").textContent=groupName;
+            openModal(deleteAllModal);
+        });
+    });
+
+    // Delete All Ungrouped Modal
+    const deleteUngroupedAllModal = document.getElementById("deleteUngroupedAllModal");
+
+    document.querySelectorAll(".delete-ungrouped-all-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+            openModal(deleteUngroupedAllModal);
+        });
+    });
+
+document.getElementById("cancelDeleteUngroupedAll").onclick = () => closeModal(deleteUngroupedAllModal);
+
+
+    // Cancel Buttons
+    document.getElementById("cancelDelete").onclick=()=>closeModal(deleteModal);
+    document.getElementById("cancelSimpleDelete").onclick=()=>closeModal(simpleDeleteModal);
+    document.getElementById("cancelDeleteAll").onclick=()=>closeModal(deleteAllModal);
+
+    // Click outside modal
+    window.onclick=e=>[uploadModal,deleteModal,simpleDeleteModal,deleteAllModal].forEach(m=>{if(e.target===m)closeModal(m)});
+});
+</script>
+{% endblock %}

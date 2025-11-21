@@ -1,0 +1,18 @@
+Centralized Patient Record Management System
+--------------------------------------------
+
+A comprehensive Django-based healthcare platform
+for securely managing and sharing patient health data
+using Aadhaar verification (via OTP or QR code).
+
+Developed as a Major Project for Academic/Research purposes.
+
+Core Modules:
+- accounts: Aadhaar verification and authentication
+- patients: Patient record uploads and grouping
+- hospitals: (future) hospital-side request management
+- core: project-level configuration, homepage, and routing
+
+Developers:
+Sindhu KP, Sampreetha, B Samarth
+Year: 2025

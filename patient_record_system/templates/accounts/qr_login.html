@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Aadhaar QR Login</title>
+  <script src="https://unpkg.com/html5-qrcode@2.2.1/minified/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <h2>Scan Aadhaar QR</h2>
+  <div id="reader" style="width:400px"></div>
+  <div id="result"></div>
+
+  <script>
+    function onScanSuccess(qrMessage) {
+      document.getElementById('result').innerText = "Scanned: " + qrMessage;
+      // POST to server for verification
+      fetch("{% url 'accounts:qr_verify' %}", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ qr: qrMessage })
+      }).then(r => r.json()).then(data => {
+        if (data.status === 'ok') {
+          window.location.href = data.redirect || '/';
+        } else {
+          alert("QR verification failed: " + data.message);
+        }
+      });
+      // stop scanning
+      html5QrcodeScanner.clear().catch(err => console.error(err));
+    }
+
+    function onScanFailure(error) {
+      // console.log(error);
+    }
+
+    const html5QrcodeScanner = new Html5Qrcode("reader");
+    html5QrcodeScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      onScanSuccess,
+      onScanFailure
+    ).catch(err => {
+      document.getElementById('result').innerText = 'Camera start error: ' + err;
+    });
+  </script>
+</body>
+</html>

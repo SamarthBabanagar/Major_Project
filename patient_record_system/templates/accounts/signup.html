@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Signup</title>
+    <style>
+        body { font-family: Arial; background-color: #f4f7f9; padding: 40px; }
+        form { background: white; padding: 30px; border-radius: 10px; width: 350px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 100%; margin: 5px 0 15px; padding: 8px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; }
+        a { text-decoration: none; color: #007bff; }
+    </style>
+</head>
+<body>
+    <form method="post">
+        <h2>Signup</h2>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Account</button>
+        <p>Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
+    </form>
+</body>
+</html>

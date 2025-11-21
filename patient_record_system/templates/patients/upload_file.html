@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Medical Record{% endblock %}
+
+{% block content %}
+<h2 style="color:#004aad; text-align:center; font-weight:600;">📄 Upload Medical Record</h2>
+
+{% if form.errors %}
+    <ul style="color:red; list-style:none; text-align:center;">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<div class="form-box">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- File -->
+        <div class="form-field">
+            <label for="{{ form.file.id_for_label }}"><strong>Select File:</strong></label>
+            {{ form.file }}
+        </div>
+
+        <!-- Title -->
+        <div class="form-field">
+            <label for="{{ form.title.id_for_label }}"><strong>Title (optional):</strong></label>
+            {{ form.title }}
+        </div>
+
+        <!-- Description -->
+        <div class="form-field">
+            <label for="{{ form.description.id_for_label }}"><strong>Description (optional):</strong></label>
+            {{ form.description }}
+        </div>
+
+        <!-- Existing Group -->
+        <div class="form-field">
+            <label for="{{ form.group.id_for_label }}"><strong>Group:</strong></label>
+            {{ form.group }}
+        </div>
+
+        <!-- New Group -->
+        <div class="form-field">
+            <label for="{{ form.new_group_name.id_for_label }}"><strong>Or Create New Group:</strong></label>
+            {{ form.new_group_name }}
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-field" style="text-align:center;">
+            <button type="submit" class="btn btn-blue">⬆️ Upload</button>
+            <a href="{% url 'home' %}" class="btn btn-outline">🏠 Cancel</a>
+        </div>
+    </form>
+
+    <p style="text-align:center; margin-top:20px; color:#555;">
+        You can group or organize uploaded files later in “My Records”.
+    </p>
+</div>
+
+<style>
+    .form-box {
+        background: #fff;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid #e3e3e3;
+        max-width: 600px;
+        margin: 30px auto;
+        transition: box-shadow 0.2s ease-in-out;
+    }
+    .form-box:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+    .form-field {
+        margin-bottom: 20px;
+    }
+    .form-field input,
+    .form-field textarea,
+    .form-field select {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-field input:focus,
+    .form-field textarea:focus,
+    .form-field select:focus {
+        border-color: #004aad;
+        box-shadow: 0 0 5px rgba(0, 74, 173, 0.3);
+        outline: none;
+    }
+</style>
+
+<!-- Add watermarks after DOM loads -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const placeholders = {
+        '{{ form.file.id_for_label }}': '',
+        '{{ form.title.id_for_label }}': 'Enter a title for the file (optional)',
+        '{{ form.description.id_for_label }}': 'Add a short note about this file (optional)',
+        '{{ form.new_group_name.id_for_label }}': 'Enter new group name'
+    };
+    for (const [id, text] of Object.entries(placeholders)) {
+        const el = document.getElementById(id);
+        if (el) el.placeholder = text;
+    }
+});
+</script>
+{% endblock %}

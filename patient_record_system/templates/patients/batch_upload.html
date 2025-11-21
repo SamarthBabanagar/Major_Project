@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Batch Upload Files{% endblock %}
+
+{% block content %}
+<h2 style="color:#004aad; text-align:center; font-weight:600;">
+    📁 Batch Upload Files
+</h2>
+
+{% if form.errors %}
+    <ul style="color:red; list-style:none; text-align:center; margin-top:10px;">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<div class="form-box">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- File input -->
+        <div class="form-field">
+            <label for="id_files"><strong>Select Files:</strong></label>
+            <input type="file" id="id_files" name="files" multiple required>
+        </div>
+
+        <!-- Title -->
+        <div class="form-field">
+            <label for="id_title"><strong>Title (optional):</strong></label>
+            <input type="text" name="title" id="id_title" placeholder="Same title for all files">
+        </div>
+
+        <!-- Description -->
+        <div class="form-field">
+            <label for="id_description"><strong>Description (optional):</strong></label>
+            <textarea name="description" id="id_description" rows="3"
+                placeholder="Add a short note about these files (optional)"></textarea>
+        </div>
+
+        <!-- Existing Group -->
+        <div class="form-field">
+            {{ form.group.label_tag }}
+            {{ form.group }}
+        </div>
+
+        <!-- New Group -->
+        <div class="form-field">
+            <label for="id_new_group_name"><strong>Or Create New Group:</strong></label>
+            <input type="text" name="new_group_name" id="id_new_group_name" placeholder="Enter new group name">
+        </div>
+
+        <div style="text-align:center;">
+            <button type="submit" class="btn btn-blue">⬆️ Upload</button>
+            <a href="{% url 'patients:my_records' %}" class="btn btn-outline" style="margin-left:10px;">🏠 Back</a>
+        </div>
+    </form>
+
+    <p style="text-align:center; margin-top:20px; color:#555;">
+        You can organize or regroup uploaded files later in “My Records”.
+    </p>
+</div>
+
+<style>
+    .form-box {
+        background: #fff;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e3e3e3;
+        max-width: 600px;
+        margin: 30px auto;
+        transition: box-shadow 0.2s ease-in-out;
+    }
+    .form-box:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    }
+    .form-field {
+        margin-bottom: 20px;
+    }
+    .form-field input,
+    .form-field textarea,
+    .form-field select {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-field input:focus,
+    .form-field textarea:focus,
+    .form-field select:focus {
+        border-color: #004aad;
+        box-shadow: 0 0 5px rgba(0, 74, 173, 0.3);
+        outline: none;
+    }
+</style>
+{% endblock %}

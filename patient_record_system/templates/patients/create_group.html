@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Create New Group{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px; margin:auto;">
+    <h2 style="color:#004aad;">➕ Create New Group</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Group Name -->
+        <div style="margin-top:15px;">
+            <label for="name">Group Name:</label><br>
+            <input type="text" id="name" name="name" required placeholder="Enter group name"
+                   style="width:100%; padding:8px; border:1px solid #ccc; border-radius:5px;">
+        </div>
+
+        <hr>
+
+        <!-- Existing Ungrouped Files -->
+        <h4>Select from existing files:</h4>
+        {% if ungrouped_files %}
+            {% for file in ungrouped_files %}
+                <label>
+                    <input type="checkbox" name="existing_files" value="{{ file.id }}"> {{ file.title }}
+                </label><br>
+            {% endfor %}
+        {% else %}
+            <p>No ungrouped files available.</p>
+        {% endif %}
+
+        <hr>
+
+        <!-- Upload New Files -->
+        <h4>Upload new files:</h4>
+        <input type="file" name="new_files" multiple><br>
+
+        <div style="margin-top:20px;">
+            <button type="submit" class="btn btn-blue">✅ Create Group with Files</button>
+            <a href="{% url 'patients:my_records' %}" class="btn btn-outline">⬅️ Back</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

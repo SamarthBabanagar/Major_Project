@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Verify OTP</title></head>
+<body>
+<h2>Enter OTP</h2>
+<form method="post" action="{% url 'accounts:aadhaar_verify_otp' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Verify OTP</button>
+</form>
+
+{% if debug_otp %}
+<p><em>DEV OTP: {{ debug_otp }}</em></p>
+{% endif %}
+</body>
+</html>

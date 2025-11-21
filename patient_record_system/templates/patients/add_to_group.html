@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h2>➕ Add Files to "{{ group.name }}"</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h4>Select from ungrouped files:</h4>
+    {% if ungrouped_files %}
+    {% for file in ungrouped_files %}
+      <label>
+        <input type="checkbox" name="existing_files" value="{{ file.id }}"> {{ file.title }}
+      </label><br>
+    {% endfor %}
+    {% else %}
+    <p>No ungrouped files available.</p>
+    {% endif %}
+
+    <hr>
+
+    <h4>Upload new files:</h4>
+    <input type="file" name="new_files" multiple><br>
+
+    <!-- Optional title input -->
+    <div style="margin-top:10px;">
+      <label for="new_file_title">Title:</label>
+      <input type="text" name="new_file_title" id="new_file_title" placeholder="Enter a title for the file (optional)" class="form-control" style="width: 100%; max-width: 400px;">
+    </div>
+
+    <div style="margin-top:20px;">
+      <button type="submit" class="btn btn-blue">✅ Add to Group</button>
+      <a href="{% url 'patients:my_records' %}" class="btn btn-outline">⬅️ Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

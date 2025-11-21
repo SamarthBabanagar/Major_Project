@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Upload Successful{% endblock %}
+
+{% block content %}
+<h2 style="color:#007bff; text-align:center;">✅ Files Uploaded Successfully!</h2>
+<p style="text-align:center;">Your medical records have been securely uploaded.</p>
+
+<div class="message-box">
+    <div style="margin-top:20px; text-align:center;">
+        <a href="{% url 'patients:upload_file' %}" class="btn btn-blue">➕ Upload Single File</a>
+        <a href="{% url 'patients:batch_upload' %}" class="btn btn-blue">📁 Batch Upload</a>
+        <a href="{% url 'patients:my_records' %}" class="btn btn-outline">📁 View My Records</a>
+        <a href="{% url 'home' %}" class="btn btn-outline">🏠 Go to Home</a>
+    </div>
+</div>
+
+<style>
+.message-box {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 600px;
+    margin: 30px auto;
+}
+.btn {
+    display: inline-block;
+    margin: 10px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+.btn-blue {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+.btn-blue:hover {
+    background-color: #0056b3;
+}
+.btn-outline {
+    background-color: white;
+    color: #007bff;
+    border: 2px solid #007bff;
+}
+.btn-outline:hover {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+{% endblock %}
